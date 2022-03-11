@@ -12,7 +12,7 @@ output:
 
 
 ```{r setup, include=FALSE}
-#knitr::opts_chunk$set(echo = TRUE, error=TRUE, message=FALSE, warning=FALSE)
+knitr::opts_chunk$set(echo = TRUE, error=TRUE, message=FALSE, warning=FALSE)
 ```
 
 ```{r libraries}
@@ -106,9 +106,13 @@ ggmap(world) +
              aes(x = Longitude, y = Latitude, color = `Ownership Type`),
              alpha = .3,
              size = .2) +
+  labs(title = "Starbucks Locations Worldwide by Ownership Type",
+       x = "Longitude",
+       y = "Latitude")
  
   theme_map()
 ```
+A lot of the Starbucks locations are either Company owned or Licensed, but an interesting majority of locations are Joint Venture in Japan and Eastern China. 
 
   2. Construct a new map of Starbucks locations in the Twin Cities metro area (approximately the 5 county metro area).  
   
@@ -122,6 +126,9 @@ ggmap(world) +
              aes(x = Longitude, y = Latitude),
              alpha = 1,
              size = 1) +
+  labs(title = "Starbucks Locations in the Twin Cities Metro Area",
+       x = "Longitude",
+       y = "Latitude")
  
   theme_map()
 ```
@@ -138,9 +145,13 @@ ggmap(world) +
              aes(x = Longitude, y = Latitude),
              alpha = 1,
              size = 1) +
+  labs(title = "Starbucks Locations in the Twin Cities Metro Area",
+       x = "Longitude",
+       y = "Latitude")
  
   theme_map()
 ```
+The zoom moves further out the higher the number. I had the zoom set to 1 at first and couldn't see anything but a few blobs of color. 
 
   4. Try a couple different map types (see `get_stamenmap()` in help and look at `maptype`). Include a map with one of the other map types.  
 
@@ -154,6 +165,9 @@ ggmap(world) +
              aes(x = Longitude, y = Latitude, color = "darkgreen"),
              alpha = 1,
              size = 1) +
+  labs(title = "Starbucks Locations in the Twin Cities Metro Area",
+       x = "Longitude",
+       y = "Latitude")
  
   theme_map()
 ```
@@ -170,7 +184,11 @@ ggmap(world) +
              aes(x = Longitude, y = Latitude, color = "darkgreen"),
              alpha = 1,
              size = 1) +
-  annotate("point", x = -93.169101, y = 44.938080, text= "Macalester College", color = "darkblue", size = 1.5)+
+  annotate("text", x = -93.169101, y = 44.938080, label= "Macalester College", color = "darkblue", size = 1.5)+
+  annotate("point", x = -93.169101, y = 44.938080, label= "Macalester College", color = "darkblue", size = 1.5) +
+  labs(title = "Starbucks Locations in the Twin Cities Metro Area, including Macalester College",
+       x = "Longitude",
+       y = "Latitude")
  
   theme_map()
 ```
@@ -241,7 +259,7 @@ starbucks_with_2018_pop_est %>%
 
 
 ```
-
+A lot of the locations are concentrated on the west coast, with the highest ratio of Starbucks to people being in their home state of Washington.
 
 ### A few of your favorite things (`leaflet`)
 
@@ -281,9 +299,10 @@ leaflet(data = favorite_places_cat) %>%
              opacity = 10,
              weight = 5) %>% 
   addLegend("topleft",
-            "In the top 3?",
+            title = "In the top 3?",
             pal = pal,
             values = ~top_three)
+  
 
   
 ```
@@ -311,12 +330,6 @@ leaflet(data = favorite_places_cat) %>%
                color = col2hex("darkblue"))
 ```
 
-  
-  * If there are other variables you want to add that could enhance your plot, do that now.  
-  
-## Revisiting old datasets
-
-This section will revisit some datasets we have used previously and bring in a mapping component. 
 
 ### Bicycle-Use Patterns
 
@@ -396,7 +409,8 @@ ggmap(world) +
        caption = "Map by Cat Terres") +
   theme_map() 
 ```
-  
+Stations closest to the river have a higher proportion of casual users perhaps because people want to bike for leisure rather than transportation.
+
 ### COVID-19 data
 
 The following exercises will use the COVID-19 data from the NYT.
@@ -426,6 +440,7 @@ newest_covid %>%
 
   
 ```
+  California, Texas, and Florida have the highest numbers of cumulative Covid deaths. I think this is a bit obvious and redundant and to improve the map, population density should be taken into account. 
   
   12. Now add the population of each state to the dataset and color the states by most recent cumulative cases/10,000 people. See the code for doing this with the Starbucks data. You will need to make some modifications. 
   
@@ -527,11 +542,40 @@ leaflet(mpls_all) %>%
             position = "topleft")
 
 ```
+  South Minneapolis, as well as downtown, has a higher proportion of stops for suspicious activity.
   
   18. Use `leaflet` to create a map of your own choosing. Come up with a question you want to try to answer and use the map to help answer that question. Describe what your map shows. 
   
+  I added a column to my favorite places table to display the frequency with which I've visited them in the last three months and colored my dots accordingly. So, where have I frequented the most in the past 3 months??
 ```{r}
-leaflet(favorite_places_cat) %>% 
+favorite_places_cat <- tibble(
+  place = c("Home", "Macalester College", "Minneapolis Institute of Art", 
+            "Cafe Latte", "Will and Corrie's House", "Half Price Books",
+            "Orchestra Hall", "Spyhouse Coffee", "Varsity Theater", "Spoon and Stable"),
+  long = c(-93.6492825600468, -93.1712321, -93.27321800238416, 
+          -93.13631961957746, -93.31092454470381,-93.26624772751424, 
+           -93.27450480662738, -93.16694786943424, -93.2368268023834, -93.26945531587614),
+  lat = c(45.20728090653907, 44.9378965, 44.95865191730926,
+          44.93990727249933, 45.212966410036486, 45.126287661067344, 
+          44.97241014246441, 44.931189622822906, 44.980914347365605, 44.98569132243515),
+  top_three = c("Yes","No","Yes","Yes","No","No","No","No","No","No"),
+  most_visited = c("Ten", "Forty Five", "Two", "Two", "One", "One", "Four", "One", "One", "Zero"))
+
+
+pal5 <- colorFactor("viridis",
+                   domain = favorite_places_cat$most_visited)
+leaflet(data = favorite_places_cat) %>% 
+  addTiles() %>%
+  addCircleMarkers(lng = ~long, 
+             lat = ~lat, 
+             color = ~pal5(most_visited),
+             label = ~place,
+             opacity = 10,
+             weight = 5) %>% 
+  addLegend("topleft",
+            title = "Frequency",
+            pal = pal5,
+            values = ~most_visited)
   
   
 ```
